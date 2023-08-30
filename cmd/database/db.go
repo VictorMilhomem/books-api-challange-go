@@ -32,6 +32,6 @@ func ConnectDB() {
 	if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Println("Connected!")
+		log.Println("Connected!")
 	}
 }
