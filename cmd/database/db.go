@@ -9,11 +9,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var (
-	DB  *sql.DB
-	err error
-)
-
 func env(key string) string {
 	err := godotenv.Load("../../.env")
 	if err != nil {
@@ -23,15 +18,17 @@ func env(key string) string {
 	return os.Getenv(key)
 }
 
-func ConnectDB() {
+func ConnectDB() (*sql.DB, error) {
 	db_string_config := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		env("HOST"), env("USER"), env("PASSWORD"), env("DB"), env("PORT"))
 
-	DB, err = sql.Open("postgres", db_string_config)
+	db, err := sql.Open("postgres", db_string_config)
 
 	if err != nil {
-		panic(err.Error())
+		log.Panic(err.Error())
 	} else {
 		log.Println("Connected!")
 	}
+
+	return db, err
 }
