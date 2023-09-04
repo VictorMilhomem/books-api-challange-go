@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/models"
+	"github.com/google/uuid"
 )
 
 func FetchAllAuthors(db *sql.DB) ([]models.Author, error) {
@@ -32,4 +33,16 @@ func FetchAllAuthors(db *sql.DB) ([]models.Author, error) {
 	}
 
 	return authors, nil
+}
+
+func FetchAuthorById(db *sql.DB, id uuid.UUID) (models.Author, error) {
+	var author models.Author
+
+	err := db.QueryRow("SELECT * FROM authors WHERE id = $1", id).Scan(&author.Id, &author.Name)
+	if err != nil {
+		log.Println("Error querying author")
+		return author, err
+	}
+
+	return author, nil
 }
