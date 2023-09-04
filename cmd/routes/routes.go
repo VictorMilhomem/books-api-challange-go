@@ -14,4 +14,5 @@ func Routes(db *sql.DB, app *fiber.App) {
 
 	app.Get("/authors", handlers.FetchAllAuthorsHandler(db).Func)
 	app.Get("/authors/:id", handlers.FetchAuthorByIdHandler(db).Func)
+	app.Post("/authors", handlers.CreateAuthorHandler(db).Func)
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/controllers"
+	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -29,6 +30,24 @@ func FetchAuthorByIdHandler(db *sql.DB) *Handler {
 		}
 
 		return c.Status(fiber.StatusOK).JSON(author)
+	})
+
+	return handler
+}
+
+func CreateAuthorHandler(db *sql.DB) *Handler {
+	handler := NewHandler(db, func(c *fiber.Ctx) error {
+		var author models.AuthorName
+		err := c.BodyParser(&author)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(err)
+		}
+
+		err = controllers.CreateAuthor(db, &author)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(err)
+		}
+		return c.Status(fiber.StatusCreated).JSON(author)
 	})
 
 	return handler

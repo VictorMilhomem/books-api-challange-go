@@ -46,3 +46,13 @@ func FetchAuthorById(db *sql.DB, id uuid.UUID) (models.Author, error) {
 
 	return author, nil
 }
+
+func CreateAuthor(db *sql.DB, author *models.AuthorName) error {
+	_, err := db.Query("INSERT INTO authors (name) VALUES ($1)", author.Name)
+	if err != nil {
+		log.Println("Error creating author")
+		return err
+	}
+
+	return nil
+}
