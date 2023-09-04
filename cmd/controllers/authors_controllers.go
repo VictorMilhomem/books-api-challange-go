@@ -56,3 +56,13 @@ func CreateAuthor(db *sql.DB, author *models.AuthorName) error {
 
 	return nil
 }
+
+func DeleteAuthorById(db *sql.DB, id uuid.UUID) error {
+	_, err := db.Query("DELETE FROM authors WHERE id = $1", id)
+	if err != nil {
+		log.Println("could not find author")
+		return err
+	}
+
+	return nil
+}

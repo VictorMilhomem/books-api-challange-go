@@ -52,3 +52,18 @@ func CreateAuthorHandler(db *sql.DB) *Handler {
 
 	return handler
 }
+
+func DeleteAuthorByIdHandler(db *sql.DB) *Handler {
+	handler := NewHandler(db, func(c *fiber.Ctx) error {
+		id := uuid.MustParse(c.Params("id"))
+
+		err := controllers.DeleteAuthorById(db, id)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(err)
+		}
+
+		return c.Status(fiber.StatusOK).JSON("Author deleted")
+	})
+
+	return handler
+}
