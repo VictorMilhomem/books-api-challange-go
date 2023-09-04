@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateSQLQueryFromCSV(filepath string, db *sql.DB) {
+func GenerateSQLQueryFromCSV(filepath string, db *sql.DB) error {
 	csvFile, err := os.Open(filepath)
 	if err != nil {
 		log.Fatal(err)
@@ -23,17 +23,10 @@ func GenerateSQLQueryFromCSV(filepath string, db *sql.DB) {
 	reader := csv.NewReader(csvFile)
 
 	// create a sql file for inserting each author
-	sqlFileName := "./cmd/migrations/" + uuid.New().String() + "auhors_migration.sql"
-	sqlFile, err := os.Create(sqlFileName)
+	sqlFileName := "cmd/migrations/" + uuid.New().String() + "authors_migration.sql"
+	sqlFile, err := readFileAndCreateSQL(reader, sqlFileName)
 	if err != nil {
-		log.Println("Erro ao criar o arquivo:", err)
-		return
-	}
-	defer sqlFile.Close()
-	err = readFileAndCreateSQL(reader, sqlFile)
-
-	if err != nil {
-		log.Fatal("Failed to create sql file")
+		log.Fatal("Failed to create sql file ", sqlFile)
 	}
 
 	err = executeSQLFromFile(db, sqlFileName)
@@ -41,9 +34,18 @@ func GenerateSQLQueryFromCSV(filepath string, db *sql.DB) {
 	if err != nil {
 		log.Fatal("Migration Failed")
 	}
+	return nil
 }
 
-func readFileAndCreateSQL(csvReader *csv.Reader, sqlFile *os.File) error {
+func readFileAndCreateSQL(csvReader *csv.Reader, sqlFileName string) (*os.File, error) {
+	sqlFile, err := os.Create(sqlFileName)
+	if err != nil {
+		log.Println("Erro ao criar o arquivo:", err)
+		return nil, err
+	}
+	defer sqlFile.Close()
+
+	line := 0
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
@@ -52,18 +54,20 @@ func readFileAndCreateSQL(csvReader *csv.Reader, sqlFile *os.File) error {
 		if err != nil {
 			log.Fatal(err)
 		}
+		if line > 0 {
+			author := models.NewAuthorName(record[0])
 
-		author := models.NewAuthorName(record[0])
+			data := fmt.Sprintf("INSERT INTO authors (name) VALUES ('%s');\n", author.Name)
 
-		data := fmt.Sprintf("INSERT INTO authors (name) VALUES (%s);\n", author.Name)
-
-		_, err = sqlFile.WriteString(data)
-		if err != nil {
-			fmt.Println("Erro ao escrever no arquivo:", err)
-			return err
+			_, err = sqlFile.WriteString(data)
+			if err != nil {
+				fmt.Println("Erro ao escrever no arquivo:", err)
+				return nil, err
+			}
 		}
+		line++
 	}
-	return nil
+	return sqlFile, nil
 }
 
 func executeSQLFromFile(db *sql.DB, filePath string) error {

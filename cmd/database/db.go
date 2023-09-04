@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/utils"
+	_ "github.com/lib/pq"
 )
 
 func ConnectDB() (*sql.DB, error) {
@@ -13,12 +14,16 @@ func ConnectDB() (*sql.DB, error) {
 		utils.Env("HOST"), utils.Env("USER"), utils.Env("PASSWORD"), utils.Env("DB"), utils.Env("PORT"))
 
 	db, err := sql.Open("postgres", db_string_config)
-
 	if err != nil {
 		log.Panic(err.Error())
-	} else {
-		log.Println("Connected!")
 	}
 
-	return db, err
+	err = db.Ping()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	log.Println("Connected!")
+
+	return db, nil
 }

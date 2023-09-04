@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/database"
+	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/routes"
 	"github.com/VictorMilhomem/go-bakcend-challenge/cmd/utils"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,10 +19,19 @@ func main() {
 	if err != nil {
 		log.Panic("Failed to connect to database")
 	}
+	defer db.Close()
+
+	// err = utils.GenerateSQLQueryFromCSV("cmd\\migrations\\migrations.csv", db)
+
+	/* if err != nil {
+		log.Panic(err)
+	} */
 
 	app := fiber.New()
 
 	// all routes here
-	listenPort := ":" + utils.Env("PORT")
+	listenPort := ":" + utils.Env("HOST_PORT")
 	app.Listen(listenPort)
+
+	routes.Routes(db, app)
 }
