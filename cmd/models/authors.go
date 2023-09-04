@@ -7,8 +7,8 @@ type AuthorName struct {
 }
 
 type Author struct {
-	Id   uuid.UUID  `json:"id"`
-	Name AuthorName `json:"name"`
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 func NewAuthorName(name string) *AuthorName {

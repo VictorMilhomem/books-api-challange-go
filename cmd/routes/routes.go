@@ -8,6 +8,10 @@ import (
 )
 
 func Routes(db *sql.DB, app *fiber.App) {
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello world!!")
+	})
+
 	app.Get("/authors", func(c *fiber.Ctx) error {
 		authors, err := controllers.FetchAllAuthors(db)
 		if err != nil {

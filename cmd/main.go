@@ -29,9 +29,8 @@ func main() {
 
 	app := fiber.New()
 
+	routes.Routes(db, app)
 	// all routes here
 	listenPort := ":" + utils.Env("HOST_PORT")
 	app.Listen(listenPort)
-
-	routes.Routes(db, app)
 }
