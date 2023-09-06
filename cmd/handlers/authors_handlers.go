@@ -9,9 +9,19 @@ import (
 	"github.com/google/uuid"
 )
 
-func FetchAllAuthorsHandler(db *sql.DB) *Handler {
-	handler := NewHandler(db, func(c *fiber.Ctx) error {
-		authors, err := controllers.FetchAllAuthors(db)
+type AuthorHandler struct {
+	db *sql.DB
+}
+
+func NewAuthorHandler(db *sql.DB) *AuthorHandler {
+	return &AuthorHandler{
+		db: db,
+	}
+}
+
+func (a AuthorHandler) FetchAllAuthorsHandler() *Handler {
+	handler := NewHandler(a.db, func(c *fiber.Ctx) error {
+		authors, err := controllers.FetchAllAuthors(a.db)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON("Could not fetch authors")
 		}
@@ -22,9 +32,9 @@ func FetchAllAuthorsHandler(db *sql.DB) *Handler {
 	return handler
 }
 
-func FetchAuthorByIdHandler(db *sql.DB) *Handler {
-	handler := NewHandler(db, func(c *fiber.Ctx) error {
-		author, err := controllers.FetchAuthorById(db, uuid.MustParse(c.Params("id")))
+func (a AuthorHandler) FetchAuthorByIdHandler() *Handler {
+	handler := NewHandler(a.db, func(c *fiber.Ctx) error {
+		author, err := controllers.FetchAuthorById(a.db, uuid.MustParse(c.Params("id")))
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON("Could not fetch author")
 		}
@@ -35,15 +45,15 @@ func FetchAuthorByIdHandler(db *sql.DB) *Handler {
 	return handler
 }
 
-func CreateAuthorHandler(db *sql.DB) *Handler {
-	handler := NewHandler(db, func(c *fiber.Ctx) error {
+func (a AuthorHandler) CreateAuthorHandler() *Handler {
+	handler := NewHandler(a.db, func(c *fiber.Ctx) error {
 		var author models.AuthorName
 		err := c.BodyParser(&author)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(err)
 		}
 
-		err = controllers.CreateAuthor(db, &author)
+		err = controllers.CreateAuthor(a.db, &author)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(err)
 		}
@@ -53,11 +63,11 @@ func CreateAuthorHandler(db *sql.DB) *Handler {
 	return handler
 }
 
-func DeleteAuthorByIdHandler(db *sql.DB) *Handler {
-	handler := NewHandler(db, func(c *fiber.Ctx) error {
+func (a AuthorHandler) DeleteAuthorByIdHandler() *Handler {
+	handler := NewHandler(a.db, func(c *fiber.Ctx) error {
 		id := uuid.MustParse(c.Params("id"))
 
-		err := controllers.DeleteAuthorById(db, id)
+		err := controllers.DeleteAuthorById(a.db, id)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(err)
 		}

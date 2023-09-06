@@ -12,8 +12,13 @@ func Routes(db *sql.DB, app *fiber.App) {
 		return c.SendString("Hello world!!")
 	})
 
-	app.Get("/authors", handlers.FetchAllAuthorsHandler(db).Func)
-	app.Get("/authors/:id", handlers.FetchAuthorByIdHandler(db).Func)
-	app.Post("/authors", handlers.CreateAuthorHandler(db).Func)
-	app.Delete("/authors/:id", handlers.DeleteAuthorByIdHandler(db).Func)
+	authorHandler := handlers.NewAuthorHandler(db)
+
+	app.Get("/authors", authorHandler.FetchAllAuthorsHandler().Func)
+	app.Get("/authors/:id", authorHandler.FetchAuthorByIdHandler().Func)
+	app.Post("/authors", authorHandler.CreateAuthorHandler().Func)
+	app.Delete("/authors/:id", authorHandler.DeleteAuthorByIdHandler().Func)
+
+	bookHandler := handlers.NewBookHandler(db)
+	app.Get("/books", bookHandler.FetchAllBooksHandler().Func)
 }
