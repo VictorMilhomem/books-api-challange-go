@@ -16,6 +16,7 @@ func FetchAllAuthors(db *sql.DB) ([]models.Author, error) {
 		log.Println("Error querying data ", err)
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var author models.Author
