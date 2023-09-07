@@ -11,15 +11,17 @@ func FetchBookAuthors(db *sql.DB, book_name string) ([]models.Author, error) {
 	var authors []models.Author
 
 	rows, err := db.Query(`
-	SELECT *
-	FROM authors
-	JOIN book_authors ON authors.id = book_authors.author_id
-	JOIN books ON book_authors.book_id = books.id
-    WHERE books.name LIKE '$1';`, book_name)
+		SELECT authors.id, authors.name
+		FROM authors
+		JOIN book_authors ON authors.id = book_authors.author_id
+		JOIN books ON book_authors.book_id = books.id
+		WHERE books.name = $1`,
+		book_name)
 	if err != nil {
 		log.Println("Error querying data ", err)
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var author models.Author
@@ -42,27 +44,27 @@ func FetchBookAuthors(db *sql.DB, book_name string) ([]models.Author, error) {
 func FetchAllBooks(db *sql.DB) ([]models.BookDB, error) {
 	var books []models.BookDB
 
-	rows, err := db.Query("SELECT * FROM books;")
+	rows, err := db.Query("SELECT id, name, edition, publication_year FROM books")
 	if err != nil {
-		log.Println("Error fetching the books")
+		log.Println("Error fetching the books:", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var book models.BookDB
+		if err := rows.Scan(&book.Id, &book.Name, &book.Edition, &book.PublicationYear); err != nil {
+			log.Println("Error scanning model:", err)
+			return nil, err
+		}
+		log.Println(book)
+		books = append(books, book)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Error fetching books:", err)
 		return nil, err
 	}
 
-	for rows.Next() {
-		for rows.Next() {
-			var book models.BookDB
-			if err := rows.Scan(&book.Id, &book.Name, &book.Edition, &book.PublicationYear); err != nil {
-				log.Println("Error scanning model ", err)
-				return nil, err
-			}
-			log.Println(book)
-			books = append(books, book)
-		}
-
-		if err := rows.Err(); err != nil {
-			log.Println("Error fetching books", err)
-			return nil, err
-		}
-	}
 	return books, nil
 }
