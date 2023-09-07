@@ -17,6 +17,11 @@ type BookDB struct {
 	PublicationYear string    `json:"publication_year"`
 }
 
+type BookAuthors struct {
+	AuthorId uuid.UUID `json:"author_id"`
+	BookId   uuid.UUID `json:"book_id"`
+}
+
 func NewBook(bookDB *BookDB, authors *[]Author) Book {
 	return Book{
 		Id:              bookDB.Id,
@@ -24,5 +29,12 @@ func NewBook(bookDB *BookDB, authors *[]Author) Book {
 		Edition:         bookDB.Edition,
 		PublicationYear: bookDB.PublicationYear,
 		Authors:         authors,
+	}
+}
+
+func NewBookAuthors(author_id uuid.UUID, book_id uuid.UUID) *BookAuthors {
+	return &BookAuthors{
+		AuthorId: author_id,
+		BookId:   book_id,
 	}
 }

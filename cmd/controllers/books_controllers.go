@@ -68,3 +68,7 @@ func FetchAllBooks(db *sql.DB) ([]models.BookDB, error) {
 
 	return books, nil
 }
+
+func CreateBookController(db *sql.DB, book *models.Book) error {
+	return nil
+}
